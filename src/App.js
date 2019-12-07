@@ -1,13 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 const { ipcRenderer } = window.require('electron');
 
+const synth = window.speechSynthesis;
+const utterance = new SpeechSynthesisUtterance();
 
 function App() {
-  const [candidateListStr, setCandidateListStr] = useState('');
-  ipcRenderer.on('receive-candidate-list', (event, data) => {
-    console.log('web page receive: ' + data);
-    setCandidateListStr(data);
-  });
+  const [speakContent, setSpeakContent] = useState('');
+  useEffect(() => {
+    ipcRenderer.on('receive-candidate-list', (event, data) => {
+      setSpeakContent(data);
+    });
+  }, []);
+  useEffect(() => {
+    synth.cancel();
+    utterance.text = speakContent;
+    synth.speak(utterance);
+    console.log(utterance);
+    console.log('web page receive: ' + speakContent);
+  }, [speakContent]);
 
   return (
     <div className="App">
@@ -17,7 +27,7 @@ function App() {
       </div>
       <div style={{ paddingTop: '50px', }}>
         candidate:<br />
-        { candidateListStr }
+        { speakContent }
       </div>
     </div>
   );

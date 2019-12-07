@@ -1,12 +1,13 @@
-const { app, BrowserWindow, clipboard, ipcMain } = require('electron');
+const { app, BrowserWindow, clipboard } = require('electron');
 const ffi = require('ffi-napi');
-const { debounce } = require('lodash');
 const path = require('path');
 const url = require('url');
 
 const WM_COPYDATA = 0x004A;
 
 let mainWindow;
+
+let candidateList = '';
 
 function createWindow () {
   const IS_DEV = process.env.NODE_ENV === 'development';
@@ -34,13 +35,16 @@ function createWindow () {
   });
   dll.SetHook(mainWindow.getNativeWindowHandle().readInt32LE());
 
-  mainWindow.hookWindowMessage(WM_COPYDATA, debounce(value => {
-    console.log('receive');
-    let candidateList = clipboard.readText();
-    // console.log(candidateList);  // use 'CHCP 65001' in windows console to avoid Chinese character error
-    mainWindow.webContents.send('receive-candidate-list', candidateList);
+  mainWindow.hookWindowMessage(WM_COPYDATA, value => {
+    let temp = clipboard.readText();
+    if (temp !== candidateList) {
+      console.log('receive');
+      console.log(temp);  // use 'CHCP 65001' in windows console to avoid Chinese character error
+      mainWindow.webContents.send('receive-candidate-list', temp);
+      candidateList = temp;
+    }
     clipboard.clear();
-  }, 200));
+  });
   mainWindow.on('closed', () => {
     dll.Unhook();
     console.log('close')
