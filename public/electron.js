@@ -1,5 +1,6 @@
-const { app, BrowserWindow, clipboard } = require('electron');
+const { app, BrowserWindow, clipboard, ipcMain } = require('electron');
 const ffi = require('ffi-napi');
+const { debounce } = require('lodash');
 const path = require('path');
 const url = require('url');
 
@@ -21,7 +22,7 @@ function createWindow () {
     width: 800,
     height: 600,
     webPreferences: {
-      nodeIntegration: true
+      nodeIntegration: true // so that page can write const { ipcRenderer } = window.require('electron');
     }
   });
 
@@ -33,11 +34,13 @@ function createWindow () {
   });
   dll.SetHook(mainWindow.getNativeWindowHandle().readInt32LE());
 
-  mainWindow.hookWindowMessage(WM_COPYDATA, value => {
-    console.log('recieve');
-    console.log(clipboard.readText());
+  mainWindow.hookWindowMessage(WM_COPYDATA, debounce(value => {
+    console.log('receive');
+    let candidateList = clipboard.readText();
+    // console.log(candidateList);  // use 'CHCP 65001' in windows console to avoid Chinese character error
+    mainWindow.webContents.send('receive-candidate-list', candidateList);
     clipboard.clear();
-  });
+  }, 200));
   mainWindow.on('closed', () => {
     dll.Unhook();
     console.log('close')

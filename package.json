@@ -46,7 +46,8 @@
     ]
   },
   "dependencies": {
-    "ffi-napi": "^2.4.5"
+    "ffi-napi": "^2.4.5",
+    "lodash": "^4.17.15"
   },
   "devDependencies": {
     "electron": "^6.0.10",
