@@ -4,7 +4,6 @@ This project uses [Create React App](https://github.com/facebook/create-react-ap
 This project uses [ffi-napi](https://github.com/node-ffi-napi/node-ffi-napi) to use dll which provides the windows hook. I tried Nodejs addon but I'm stupid so it didn't work.<br >
 This project uses [electron-builder](https://github.com/electron-userland/electron-builder) to package it.<br />
 This project uses [node-sqlite3](https://github.com/mapbox/node-sqlite3) to access the database, and because it's asynchronous, uses async/await to do the sql query.<br />
-
 ## Requirments
 + It seems that nodejs, node-gyp, windows-build-tools could be the latest version and 64-bit. Python 2.7 will be automatically installed by windows-build-tools.<br />
 `npm install -g node-gyp windows-build-tools`<br />
