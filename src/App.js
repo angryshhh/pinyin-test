@@ -26,7 +26,7 @@ function App() {
         <input></input>
       </div>
       <div style={{ paddingTop: '50px', }}>
-        candidate:<br />
+        speakContent:<br />
         { speakContent }
       </div>
     </div>
