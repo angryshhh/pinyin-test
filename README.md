@@ -3,6 +3,7 @@ This project uses a windows hook developed by myself, which you can find in [Pin
 This project uses [Create React App](https://github.com/facebook/create-react-app) and [Electron](https://github.com/electron/electron).<br />
 This project uses [ffi-napi](https://github.com/node-ffi-napi/node-ffi-napi) to use dll which provides the windows hook. I tried Nodejs addon but I'm stupid so it didn't work.<br >
 This project uses [electron-builder](https://github.com/electron-userland/electron-builder) to package it.
+This project uses [node-sqlite3](https://github.com/mapbox/node-sqlite3) to access the database, and because it's asynchronous, uses async/await to do the sql query.
 
 ## Requirments
 + It seems that nodejs, node-gyp, windows-build-tools could be the latest version and 64-bit. Python 2.7 will be automatically installed by windows-build-tools.<br />
@@ -11,6 +12,9 @@ This project uses [electron-builder](https://github.com/electron-userland/electr
 `npm install --arch=ia32`<br />
 + The windows console has some problem with Chinese character, run this in the console before debug:<br />
 `CHCP 65001`
++ To let sqlite3 work with electron, need to run the script below after installing sqlite3:<br />
+`yarn electron-builder install-app-deps --arch=ia32`<br />
+or there could be "Error: cannot find module '...\node_modules\sqlite3\lib\binding\electron-v6.0-win32-ia32\node_sqlite3.node'<br />
 + For develepment, start the react app first, and run the electron app:<br />
 `yarn start`<br />
 `yarn electron-dev`<br />
