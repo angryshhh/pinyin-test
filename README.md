@@ -7,7 +7,7 @@ This project uses [node-sqlite3](https://github.com/mapbox/node-sqlite3) to acce
 ## Requirments
 + It seems that nodejs, node-gyp, windows-build-tools could be the latest version and 64-bit. Python 2.7 will be automatically installed by windows-build-tools.<br />
 `npm install -g node-gyp windows-build-tools`<br />
-+ The hook only works in Windows, and it's a 32-bit program, so Electron, ffi-napi and electron-builder must be 32-bit, and when you use electron-builder to package it, use --arch=ia32 (already included in the npm scripts). <br />
++ The hook only works in Windows, and it's a 32-bit program, so Electron, ffi-napi and electron-builder must be 32-bit, and when you use electron-builder to package it, use --arch=ia32 (already included in the npm scripts). And you must install a package with --arch=ia32, or the npm install scripts will rebuild them as 64bit. <br />
 `npm install --arch=ia32`<br />
 + The windows console has some problem with Chinese character, run this in the console before debug:<br />
 `CHCP 65001`

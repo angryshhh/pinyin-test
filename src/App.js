@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Button } from 'antd';
 const { ipcRenderer } = window.require('electron');
 
 const synth = window.speechSynthesis;
@@ -29,6 +30,7 @@ function App() {
         speakContent:<br />
         { speakContent }
       </div>
+      <Button type="primary">Button</Button>
     </div>
   );
 }
