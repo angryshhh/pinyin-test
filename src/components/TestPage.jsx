@@ -1,4 +1,3 @@
-import React, { useState, useEffect} from 'react';
 import {
   Card,
   Collapse,
@@ -6,44 +5,33 @@ import {
   Layout,
 } from 'antd';
 import PropTypes from 'prop-types';
+import React, { useState, useEffect} from 'react';
+import { Link } from 'react-router-dom';
 import AnalysisResult from './AnalysisResult';
 
 const { Panel } = Collapse;
 const { Header, Footer, Content } = Layout;
 
-const { ipcRenderer } = window.require('electron');
-const synth = window.speechSynthesis;
-const utterance = new SpeechSynthesisUtterance();
-
 const TestPage = (props) => {
+  let { forceSpeak } = props.speakControl;
   const [activeKey, setActiveKey] = useState(0);
   const [analysisResults, setAnalysisResults] = useState(new Array(props.targetStrings.length).fill(false));
-  // const [speakContent, setSpeakContent] = useState('');
-  useEffect(() => {
-    ipcRenderer.on('receive-candidate-list', (event, data) => {
-      console.log('web page receive:' + data);
-      synth.cancel();
-      utterance.text = data;
-      synth.speak(utterance);
-    });
-  }, []);
 
   useEffect(() => {
+    forceSpeak(props.targetStrings[activeKey]);
     document.querySelectorAll('#input' + activeKey)[0].focus();
   }, [activeKey]);
-
 
   return (
     <div>
       <Layout style={{ height: '100vh' }}>
-        <Header style={{ textAlign: 'center', color: 'white' }}>{'测试页面'}</Header>
+        <Header style={{ textAlign: 'center', color: 'white' }}>测试页面</Header>
 
         <Content style={{ padding: '0 50px' }}>
           <div style={{ background: '#fff', padding: 24, height: '100%', overflowY: 'scroll' }}>
             <Collapse
               accordion
               activeKey={[activeKey]}
-              // activeKey={props.targetStrings.map((value, index) => index)}
               onChange={clickedKey => {
                 if (clickedKey) {
                   setActiveKey(clickedKey);
@@ -59,7 +47,7 @@ const TestPage = (props) => {
                     <Card title={`Target string: ${targetString}`}>
                       <Input
                         id={'input' + index}
-                        placeholder={'在此输入' + index}
+                        placeholder="在此输入"
                         disabled={analysisResults[index]}
                         onKeyPress={e => {
                           if (e.charCode === 13) {
@@ -79,7 +67,8 @@ const TestPage = (props) => {
                             } else {
                               fun = e => {
                                 if (e.charCode === 13 && e.path.length === 4) {
-                                  setActiveKey(index);
+                                  // setActiveKey(index);
+                                  forceSpeak('实验结束');
                                   document.removeEventListener('keypress', fun);
                                 }
                               }
@@ -89,9 +78,7 @@ const TestPage = (props) => {
                         }}
                       ></Input>
                     </Card>
-                    {/* <Button onClick={() => setActiveKey(index + 1)}></Button> */}
                     {
-                      // index === 3 ?
                       analysisResults[index] ?
                       <AnalysisResult></AnalysisResult> :
                       null
@@ -101,9 +88,12 @@ const TestPage = (props) => {
               }
             </Collapse>
           </div>
+
         </Content>
 
-        <Footer style={{ textAlign: 'center' }}>Footer</Footer>
+        <Footer style={{ textAlign: 'center' }}>
+          <Link to="/">返回登录</Link>
+        </Footer>
       </Layout>
     </div>
   );
@@ -111,6 +101,7 @@ const TestPage = (props) => {
 
 TestPage.propTypes = {
   targetStrings: PropTypes.array,
+  speakControl: PropTypes.object,
 };
 
 export default TestPage;

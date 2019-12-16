@@ -2,7 +2,6 @@ import React from 'react';
 import { Descriptions, Divider } from 'antd';
 
 const AnalysisResult = () => {
-
   return (
     <div>
       <Divider>分析结果</Divider>
