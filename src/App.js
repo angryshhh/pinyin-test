@@ -1,11 +1,16 @@
 import React, { useEffect } from 'react';
 import {
-  BrowserRouter as Router,
+  BrowserRouter,
   Switch,
   Route,
+  Redirect,
+  useLocation,
 } from 'react-router-dom';
-import TestPage from './components/TestPage';
-import Login from './components/Login';
+import { Layout } from 'antd';
+import BlockPage from './components/BlockPage';
+import LoginPage from './components/LoginPage';
+
+const { Header, Content, Footer } = Layout;
 
 const { ipcRenderer } = window.require('electron');
 const synth = window.speechSynthesis;
@@ -41,17 +46,34 @@ function App() {
   }, []);
 
   return (
-    <Router>
-      <Switch>
-        <Route path='/test'>
-          <TestPage targetStrings={targetStrings} speakControl={speakControl} ></TestPage>
-        </Route>
-        <Route path='/'>
-          <Login speakControl={speakControl} ></Login>
-        </Route>
-      </Switch>
-    </Router>
-    
+    <BrowserRouter>
+      <Layout style={{ height: '100vh' }}>
+        <Header style={{ color: 'white', textAlign: 'center' }}></Header>
+        <Content style={{ padding: '0 50px' }}>
+          <div style={{
+            background: 'white',
+            padding: 24,
+            height: '100%',
+            overflowY: 'scroll',
+          }}>
+            <Switch>
+              <Route exact path="/">
+                <Redirect to="/login"></Redirect>
+              </Route>
+              <Route path="/login">
+                <LoginPage speakControl={speakControl} ></LoginPage>
+              </Route>
+              <Route path="/block">
+                <BlockPage targetStrings={targetStrings} speakControl={speakControl} ></BlockPage>
+              </Route>
+            </Switch>
+          </div>
+        </Content>
+        <Footer style={{ textAlign: 'center' }}>
+
+        </Footer>
+      </Layout>
+    </BrowserRouter>
   );
 }
 
