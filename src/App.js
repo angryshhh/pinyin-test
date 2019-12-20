@@ -4,44 +4,21 @@ import {
   Switch,
   Route,
   Redirect,
-  useLocation,
 } from 'react-router-dom';
 import { Layout } from 'antd';
 import BlockPage from './components/BlockPage';
 import LoginPage from './components/LoginPage';
+import SpeakControl from './utils/SpeakControl';
 
 const { Header, Content, Footer } = Layout;
 
 const { ipcRenderer } = window.require('electron');
-const synth = window.speechSynthesis;
-const utterance = new SpeechSynthesisUtterance();
-
-const cancelFormerSpeak = () => {
-  synth.cancel();
-}
-const speak = (content) => {
-  utterance.text = content;
-  synth.speak(utterance);
-}
-const forceSpeak = (content) => {
-  cancelFormerSpeak();
-  speak(content);
-}
-const speakControl = { cancelFormerSpeak, speak, forceSpeak };
-
-const targetStrings = [
-  '您吃了吗',
-  '天气不错',
-  '很高兴认识你',
-  '打篮球还是踢足球',
-  '新闻播送结束',
-];
 
 function App() {
   useEffect(() => {
     ipcRenderer.on('receive-candidate-list', (event, data) => {
       console.log('web page receive:' + data);
-      forceSpeak(data);
+      SpeakControl.forceSpeak(data);
     });
   }, []);
 
@@ -61,10 +38,10 @@ function App() {
                 <Redirect to="/login"></Redirect>
               </Route>
               <Route path="/login">
-                <LoginPage speakControl={speakControl} ></LoginPage>
+                <LoginPage />
               </Route>
               <Route path="/block">
-                <BlockPage targetStrings={targetStrings} speakControl={speakControl} ></BlockPage>
+                <BlockPage />
               </Route>
             </Switch>
           </div>

@@ -33,6 +33,10 @@ const reducer = (state, action) => {
           ...state.trials.slice(action.index + 1),
         ],
       };
+    case 'RESET_TRIALS':
+      return {
+        trials: state.trials.map(trial => ({...trial, analysisResult: false})),
+      }
     default:
       throw new Error();
   }

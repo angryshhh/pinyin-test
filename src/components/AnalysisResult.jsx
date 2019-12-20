@@ -1,5 +1,5 @@
-import React from 'react';
 import { Descriptions, Divider } from 'antd';
+import React from 'react';
 
 const AnalysisResult = () => {
   return (
