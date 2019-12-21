@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   BrowserRouter,
   Switch,
@@ -15,6 +15,8 @@ const { Header, Content, Footer } = Layout;
 const { ipcRenderer } = window.require('electron');
 
 function App() {
+  const [title, setTitle] = useState('登录');
+
   useEffect(() => {
     ipcRenderer.on('receive-candidate-list', (event, data) => {
       console.log('web page receive:' + data);
@@ -25,7 +27,7 @@ function App() {
   return (
     <BrowserRouter>
       <Layout style={{ height: '100vh' }}>
-        <Header style={{ color: 'white', textAlign: 'center' }}></Header>
+        <Header style={{ color: 'white', textAlign: 'center' }}>{ title }</Header>
         <Content style={{ padding: '0 50px' }}>
           <div style={{
             background: 'white',
@@ -40,8 +42,8 @@ function App() {
               <Route path="/login">
                 <LoginPage />
               </Route>
-              <Route path="/block">
-                <BlockPage />
+              <Route path="/block/:blockNum">
+                <BlockPage setTitle={setTitle} />
               </Route>
             </Switch>
           </div>

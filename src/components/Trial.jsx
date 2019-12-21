@@ -3,11 +3,13 @@ import {
   Input,
 } from 'antd';
 import React, { useState, useEffect, useContext } from 'react';
+import { useHistory } from 'react-router-dom';
 import AnalysisResult from './AnalysisResult';
 import SpeakControl from '../utils/SpeakControl';
 import { TrialsDispatch } from './Contexts';
 
 const Trial = (props) => {
+  const history = useHistory();
   const [isEntering, setIsEntering] = useState(false);
   const dispatch = useContext(TrialsDispatch);
 
@@ -42,13 +44,30 @@ const Trial = (props) => {
 
               let handleNextEnter;
               if (props.isLastTrial) {
-                handleNextEnter = e => {
-                  // if (e.charCode === 13 && e.path.length === 4) {
-                  if (e.charCode === 13) {
-                    SpeakControl.forceSpeak('实验结束');
-                    document.removeEventListener('keypress', handleNextEnter);
+                if (props.isLastBlock) {
+                  handleNextEnter = e => {
+                    // if (e.charCode === 13 && e.path.length === 4) {
+                    if (e.charCode === 13) {
+                      SpeakControl.forceSpeak('实验结束');
+                      document.removeEventListener('keypress', handleNextEnter);
+                    }
+                  };
+                } else {
+                  handleNextEnter = e => {
+                    if (e.charCode === 13) {
+                      SpeakControl.forceSpeak('该block结束，回车进入下一block');
+                      document.removeEventListener('keypress', handleNextEnter);
+                      let handleNextBlock = e => {
+                        if (e.charCode === 13) {
+                          history.push(`/block/${props.blockNum + 1}`);
+                          document.removeEventListener('keypress', handleNextBlock);
+                        }
+                      }
+                      document.addEventListener('keypress', handleNextBlock);
+                    }
                   }
-                };
+                }
+
               } else {
                 handleNextEnter = e => {
                   // if (e.charCode === 13 && e.path.length === 4) {

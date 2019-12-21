@@ -38,7 +38,7 @@ const LoginPage = (props) => {
                 title: '重要提示',
                 content: infoContent,
                 onOk() {
-                  history.push('/block');
+                  history.push('/block/1');
                 }
               });
             },
