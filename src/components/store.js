@@ -1,5 +1,6 @@
 const initialState = {
   blockCount: 5,
+  currentBlock: 1,
   targetStrings: [
     '您吃了吗',
     '天气不错',
@@ -14,52 +15,59 @@ const initialState = {
       targetString: '您吃了吗',
       wordFrequencyLevel: 0,
       referenceStructureLevel: 0,
-      analysisResult: false,
     },
     {
       targetString: '天气不错',
       wordFrequencyLevel: 0,
       referenceStructureLevel: 1,
-      analysisResult: false,
     },
     {
       targetString: '很高兴认识你',
       wordFrequencyLevel: 1,
       referenceStructureLevel: 0,
-      analysisResult: false,
     },
     {
       targetString: '打篮球还是踢足球',
       wordFrequencyLevel: 1,
       referenceStructureLevel: 1,
-      analysisResult: false,
     },
     {
       targetString: '新闻播送结束',
       wordFrequencyLevel: 0,
       referenceStructureLevel: 1,
-      analysisResult: false,
     },
   ],
+  currentTrial: 1,
   results: [],
 };
 
 const reducer = (state, action) => {
   switch (action.type) {
     case 'COMPLETE_TRIAL':
+      let { results } = state;
+      results.push(action.index + 1);
       return {
         ...state,
-        trials: [
-          ...state.trials.slice(0, action.index),
-          { ...state.trials[action.index], analysisResult: true },
-          ...state.trials.slice(action.index + 1),
-        ],
+        results,
       };
-    case 'RESET_TRIALS':
+    case 'NEXT_TRIAL':
+      let { currentTrial, trials } = state;
+      if (currentTrial < trials.length) currentTrial++;
+      else currentTrial = 1;
       return {
         ...state,
-        trials: state.trials.map(trial => ({...trial, analysisResult: false})),
-      }
+        currentTrial,
+      };
+    case 'NEXT_BLOCK':
+      if (state.currentBlock !== state.blockCount) {
+        let { currentBlock, blockCount } = state;
+
+        return {
+          ...state,
+          currentBlock: Math.min(currentBlock + 1, blockCount),
+          currentTrial: 1,
+        };
+      } else return state;
     default:
       throw new Error();
   }

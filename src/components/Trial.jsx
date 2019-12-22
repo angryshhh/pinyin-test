@@ -3,30 +3,31 @@ import {
   Input,
 } from 'antd';
 import React, { useState, useEffect, useContext } from 'react';
-import { useHistory } from 'react-router-dom';
 import AnalysisResult from './AnalysisResult';
 import SpeakControl from '../utils/SpeakControl';
 import { TrialsDispatch } from './Contexts';
 
 const Trial = (props) => {
-  const history = useHistory();
   const [isEntering, setIsEntering] = useState(false);
   const dispatch = useContext(TrialsDispatch);
 
   useEffect(() => {
-    SpeakControl.forceSpeak(props.trial.targetString);
-    let handleSpaceAndEnter = e => {
-      if (e.charCode === 32) {
-        e.preventDefault();
-        SpeakControl.forceSpeak(props.trial.targetString);
-      } else if (e.charCode === 13) {
-        setIsEntering(true);
-        document.querySelector(`#input${props.index}`).focus();
-        document.removeEventListener('keypress', handleSpaceAndEnter);
+    if (props.isCurrentTrial) {
+      SpeakControl.forceSpeak(props.trial.targetString);
+      setIsEntering(false)
+      let handleSpaceAndEnter = e => {
+        if (e.charCode === 32) {
+          e.preventDefault();
+          SpeakControl.forceSpeak(props.trial.targetString);
+        } else if (e.charCode === 13) {
+          setIsEntering(true);
+          document.querySelector(`#input${props.index}`).focus();
+          document.removeEventListener('keypress', handleSpaceAndEnter);
+        }
       }
+      document.addEventListener('keypress', handleSpaceAndEnter);
     }
-    document.addEventListener('keypress', handleSpaceAndEnter);
-  }, [props.trial.targetString, props.index]);
+  }, [props.isCurrentTrial]);
 
   return (
     <div>
@@ -37,53 +38,36 @@ const Trial = (props) => {
           disabled={!isEntering}
           onKeyPress={e => {
             if (e.charCode === 13) {
-              // do the analyse
-              SpeakControl.forceSpeak('输入结束，回车进行下一个');
               setIsEntering(false);
               dispatch({ type: 'COMPLETE_TRIAL', index: props.index });
 
-              let handleNextEnter;
               if (props.isLastTrial) {
                 if (props.isLastBlock) {
-                  handleNextEnter = e => {
-                    // if (e.charCode === 13 && e.path.length === 4) {
-                    if (e.charCode === 13) {
-                      SpeakControl.forceSpeak('实验结束');
-                      document.removeEventListener('keypress', handleNextEnter);
-                    }
-                  };
+                  SpeakControl.forceSpeak('实验结束');
                 } else {
-                  handleNextEnter = e => {
+                  SpeakControl.forceSpeak('该block结束，回车进行下一block');
+                  let handleNextEnter = e => {
                     if (e.charCode === 13) {
-                      SpeakControl.forceSpeak('该block结束，回车进入下一block');
+                      dispatch({ type: 'NEXT_BLOCK' });
                       document.removeEventListener('keypress', handleNextEnter);
-                      let handleNextBlock = e => {
-                        if (e.charCode === 13) {
-                          history.push(`/block/${props.blockNum + 1}`);
-                          document.removeEventListener('keypress', handleNextBlock);
-                        }
-                      }
-                      document.addEventListener('keypress', handleNextBlock);
                     }
                   }
+                  document.addEventListener('keypress', handleNextEnter);
                 }
-
               } else {
-                handleNextEnter = e => {
-                  // if (e.charCode === 13 && e.path.length === 4) {
-                  if (e.charCode === 13) {
-                    props.setActiveKey(props.index + 1);
-                    document.removeEventListener('keypress', handleNextEnter);
-                  }
-                };
+                SpeakControl.forceSpeak('输入结束，回车进行下一个');
+                let handleNextEnter = e => {
+                  dispatch({ type: 'NEXT_TRIAL' });
+                  document.removeEventListener('keypress', handleNextEnter);
+                }
+                document.addEventListener('keypress', handleNextEnter);
               }
-              document.addEventListener('keypress', handleNextEnter);
             }
           }}
         />
       </Card>
       {
-        props.trial.analysisResult ?
+        props.result ?
         <AnalysisResult></AnalysisResult> :
         null
       }
