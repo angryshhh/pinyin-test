@@ -10,6 +10,7 @@ import { TrialsDispatch } from './Contexts';
 const Trial = (props) => {
   const [isEntering, setIsEntering] = useState(false);
   const dispatch = useContext(TrialsDispatch);
+  const [startEnterTime, setStartEnterTime] = useState(new Date());
 
   useEffect(() => {
     if (props.isCurrentTrial) {
@@ -20,6 +21,7 @@ const Trial = (props) => {
           e.preventDefault();
           SpeakControl.forceSpeak(props.trial.targetString);
         } else if (e.charCode === 13) {
+          setStartEnterTime(new Date());
           setIsEntering(true);
           document.querySelector(`#input${props.index}`).focus();
           document.removeEventListener('keypress', handleSpaceAndEnter);
@@ -38,8 +40,16 @@ const Trial = (props) => {
           disabled={!isEntering}
           onKeyPress={e => {
             if (e.charCode === 13) {
+              let trialTime = new Date() - startEnterTime;
               setIsEntering(false);
-              dispatch({ type: 'COMPLETE_TRIAL', index: props.index });
+              dispatch({
+                type: 'COMPLETE_TRIAL',
+                result: {
+                  trialTime,
+                  wordFrequencyLevel: props.trial.wordFrequencyLevel,
+                  referenceStructureLevel: props.trial.referenceStructureLevel,
+                },
+              });
 
               if (props.isLastTrial) {
                 if (props.isLastBlock) {
@@ -68,7 +78,7 @@ const Trial = (props) => {
       </Card>
       {
         props.result ?
-        <AnalysisResult></AnalysisResult> :
+        <AnalysisResult result={props.result}></AnalysisResult> :
         null
       }
     </div>

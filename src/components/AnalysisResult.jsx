@@ -1,16 +1,17 @@
 import { Descriptions, Divider } from 'antd';
 import React from 'react';
 
-const AnalysisResult = () => {
+const AnalysisResult = (props) => {
+  const { result } = props;
   return (
     <div>
       <Divider>分析结果</Divider>
       <Descriptions
         bordered
-        >
-        <Descriptions.Item label="输入时长">00:04:23</Descriptions.Item>
-        <Descriptions.Item label="Billing">Prepaid</Descriptions.Item>
-        <Descriptions.Item label="time">18:00:00</Descriptions.Item>
+      >
+        <Descriptions.Item label="输入时长">{result.trialTime}毫秒</Descriptions.Item>
+        <Descriptions.Item label="提示用词次品">{result.wordFrequencyLevel}</Descriptions.Item>
+        <Descriptions.Item label="提示内容结构">{result.referenceStructureLevel}</Descriptions.Item>
         <Descriptions.Item label="Amount">$80.00</Descriptions.Item>
         <Descriptions.Item label="Discount">$20.00</Descriptions.Item>
         <Descriptions.Item label="Official">$60.00</Descriptions.Item>

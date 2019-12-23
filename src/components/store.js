@@ -50,7 +50,7 @@ const reducer = (state, action) => {
       };
     case 'COMPLETE_TRIAL':
       let { results } = state;
-      results.push(action.index + 1);
+      results.push(action.result);
       return {
         ...state,
         results,
