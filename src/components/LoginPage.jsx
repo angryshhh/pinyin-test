@@ -2,9 +2,10 @@ import {
   Modal,
   Input,
 } from 'antd';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useHistory } from 'react-router-dom';
 import SpeakControl from '../utils/SpeakControl';
+import { TrialsDispatch } from './Contexts.js';
 
 const { confirm, info } = Modal;
 
@@ -13,6 +14,7 @@ const infoContent = '本次实验的步骤是 bla bla bla。实验即将开始�
 const LoginPage = (props) => {
   const history = useHistory();
   const [subjectCode, setSubjectCode] = useState();
+  const dispatch = useContext(TrialsDispatch);
 
   useEffect(() => {
     SpeakControl.forceSpeak('请输入编号');
@@ -38,7 +40,11 @@ const LoginPage = (props) => {
                 title: '重要提示',
                 content: infoContent,
                 onOk() {
-                  history.push('/block/1');
+                  dispatch({
+                    type: 'SUBJECT_LOGIN',
+                    subjectCode,
+                  })
+                  history.push('/block');
                 }
               });
             },

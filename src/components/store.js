@@ -43,6 +43,11 @@ const initialState = {
 
 const reducer = (state, action) => {
   switch (action.type) {
+    case 'SUBJECT_LOGIN':
+      return {
+        ...state,
+        subjectCode: action.subjectCode,
+      };
     case 'COMPLETE_TRIAL':
       let { results } = state;
       results.push(action.index + 1);

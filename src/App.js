@@ -26,10 +26,6 @@ function App() {
     });
   }, []);
 
-  useEffect(() => {
-    console.log(state);
-  }, [state.currentTrial]);
-
   return (
     <BrowserRouter>
       <Layout style={{ height: '100vh' }}>
