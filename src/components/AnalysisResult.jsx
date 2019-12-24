@@ -12,21 +12,15 @@ const AnalysisResult = (props) => {
         <Descriptions.Item label="输入时长">{result.trialTime}毫秒</Descriptions.Item>
         <Descriptions.Item label="提示用词次品">{result.wordFrequencyLevel}</Descriptions.Item>
         <Descriptions.Item label="提示内容结构">{result.referenceStructureLevel}</Descriptions.Item>
-        <Descriptions.Item label="Amount">$80.00</Descriptions.Item>
-        <Descriptions.Item label="Discount">$20.00</Descriptions.Item>
-        <Descriptions.Item label="Official">$60.00</Descriptions.Item>
-        <Descriptions.Item label="Config Info">
-          Data disk type: MongoDB
-          <br />
-          Database version: 3.4
-          <br />
-          Package: dds.mongo.mid
-          <br />
-          Storage space: 10 GB
-          <br />
-          Replication factor: 3
-          <br />
-          Region: East China 1
+        <Descriptions.Item label="subject code">{result.subjectCode}</Descriptions.Item>
+        <Descriptions.Item label="block num">{result.blockNum}</Descriptions.Item>
+        <Descriptions.Item label="trial num">{result.trialNum}</Descriptions.Item>
+        <Descriptions.Item label="各字输入时间">
+          {
+            result.charEnterTimes.map(time =>
+              <p key={time}>{time}毫秒</p>
+            )
+          }
         </Descriptions.Item>
       </Descriptions>
     </div>

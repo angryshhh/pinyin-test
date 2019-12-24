@@ -7,15 +7,23 @@ import AnalysisResult from './AnalysisResult';
 import SpeakControl from '../utils/SpeakControl';
 import { TrialsDispatch } from './Contexts';
 
+const { ipcRenderer } = window.require('electron');
+
 const Trial = (props) => {
   const [isEntering, setIsEntering] = useState(false);
+  const [resultString, setResultString] = useState('');
   const dispatch = useContext(TrialsDispatch);
   const [startEnterTime, setStartEnterTime] = useState(new Date());
+  const [charStartTime, setCharStartTime] = useState(new Date());
+  const [charEnterTimes, setCharEnterTimes] = useState([]);
 
   useEffect(() => {
     if (props.isCurrentTrial) {
       SpeakControl.forceSpeak(props.trial.targetString);
-      setIsEntering(false)
+      setResultString('');
+      setIsEntering(false);
+      setCharStartTime(new Date());
+      setCharEnterTimes([]);
       let handleSpaceAndEnter = e => {
         if (e.charCode === 32) {
           e.preventDefault();
@@ -23,13 +31,14 @@ const Trial = (props) => {
         } else if (e.charCode === 13) {
           setStartEnterTime(new Date());
           setIsEntering(true);
+          ipcRenderer.send('is-entering-char', true);
           document.querySelector(`#input${props.index}`).focus();
           document.removeEventListener('keypress', handleSpaceAndEnter);
         }
       }
       document.addEventListener('keypress', handleSpaceAndEnter);
     }
-  }, [props.isCurrentTrial]);
+  }, [props.isCurrentTrial, props.index, props.trial.targetString]);
 
   return (
     <div>
@@ -38,6 +47,18 @@ const Trial = (props) => {
           id={'input' + props.index}
           placeholder="在此输入"
           disabled={!isEntering}
+          value={resultString}
+          onChange={e => {
+            let str = e.target.value;
+            setResultString(str);
+            if (str[str.length - 1] === ' ') {
+              setCharStartTime(e.timeStamp);
+            } else {
+              charEnterTimes.push(e.timeStamp - charStartTime);
+              setCharEnterTimes(charEnterTimes);
+              console.log(charEnterTimes)
+            }
+          }}
           onKeyPress={e => {
             if (e.charCode === 13) {
               let trialTime = new Date() - startEnterTime;
@@ -48,6 +69,7 @@ const Trial = (props) => {
                   trialTime,
                   wordFrequencyLevel: props.trial.wordFrequencyLevel,
                   referenceStructureLevel: props.trial.referenceStructureLevel,
+                  charEnterTimes,
                 },
               });
 
@@ -72,6 +94,9 @@ const Trial = (props) => {
                 }
                 document.addEventListener('keypress', handleNextEnter);
               }
+            } else if (e.charCode === 32) { // ban space key
+              e.preventDefault();
+              console.log('用户输入空格');
             }
           }}
         />

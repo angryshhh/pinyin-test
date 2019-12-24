@@ -50,6 +50,9 @@ const reducer = (state, action) => {
       };
     case 'COMPLETE_TRIAL':
       let { results } = state;
+      action.result.subjectCode = state.subjectCode;
+      action.result.blockNum = state.currentBlock;
+      action.result.trialNum = state.currentTrial
       results.push(action.result);
       return {
         ...state,

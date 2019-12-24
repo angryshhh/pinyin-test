@@ -1,4 +1,4 @@
-const { app, BrowserWindow, clipboard } = require('electron');
+const { app, BrowserWindow, clipboard, ipcMain } = require('electron');
 const ffi = require('ffi-napi');
 const path = require('path');
 const sqlite3 = require('sqlite3').verbose();
@@ -9,6 +9,7 @@ const WM_COPYDATA = 0x004A;
 let mainWindow;
 
 let candidateList = '';
+
 let db;
 const sql = `select word from t_word join (t_character_word join t_character on char_id = t_character.id) on word_id = t_word.id where character=? order by frequency desc limit 1`;
 
