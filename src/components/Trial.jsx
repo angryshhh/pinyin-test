@@ -7,15 +7,13 @@ import AnalysisResult from './AnalysisResult';
 import SpeakControl from '../utils/SpeakControl';
 import { TrialsDispatch } from './Contexts';
 
-const { ipcRenderer } = window.require('electron');
-
 const Trial = (props) => {
   const [isEntering, setIsEntering] = useState(false);
   const [resultString, setResultString] = useState('');
-  const dispatch = useContext(TrialsDispatch);
   const [startEnterTime, setStartEnterTime] = useState(new Date());
   const [charStartTime, setCharStartTime] = useState(new Date());
   const [charEnterTimes, setCharEnterTimes] = useState([]);
+  const dispatch = useContext(TrialsDispatch);
 
   useEffect(() => {
     if (props.isCurrentTrial) {
@@ -31,7 +29,6 @@ const Trial = (props) => {
         } else if (e.charCode === 13) {
           setStartEnterTime(new Date());
           setIsEntering(true);
-          ipcRenderer.send('is-entering-char', true);
           document.querySelector(`#input${props.index}`).focus();
           document.removeEventListener('keypress', handleSpaceAndEnter);
         }
@@ -50,33 +47,39 @@ const Trial = (props) => {
           value={resultString}
           onChange={e => {
             let str = e.target.value;
-            setResultString(str);
             if (str[str.length - 1] === ' ') {
+              // handle the blank from the input method
+              // take this blank as the begin of
+              // the enter of the chinese character
+              setResultString(str);
               setCharStartTime(e.timeStamp);
-            } else {
+            } else if (/.*[\u4e00-\u9fa5]+.*$/.test(str[str.length - 1])) {
+              // only handle chinese character
+              // not some symbols returned from input method
+              setResultString(str);
+              SpeakControl.cancelFormerSpeak();
               charEnterTimes.push(e.timeStamp - charStartTime);
               setCharEnterTimes(charEnterTimes);
-              console.log(charEnterTimes)
-            }
-          }}
-          onKeyPress={e => {
-            if (e.charCode === 13) {
-              let trialTime = new Date() - startEnterTime;
-              setIsEntering(false);
-              dispatch({
-                type: 'COMPLETE_TRIAL',
-                result: {
-                  trialTime,
-                  wordFrequencyLevel: props.trial.wordFrequencyLevel,
-                  referenceStructureLevel: props.trial.referenceStructureLevel,
-                  charEnterTimes,
-                },
-              });
 
-              if (props.isLastTrial) {
-                if (props.isLastBlock) {
+              if (str.length === props.trial.targetString.length) {
+                // finish trial
+                let trialTime = new Date() - startEnterTime;
+                setIsEntering(false);
+                dispatch({
+                  type: 'COMPLETE_TRIAL',
+                  result: {
+                    trialTime,
+                    wordFrequencyLevel: props.trial.wordFrequencyLevel,
+                    referenceStructureLevel: props.trial.referenceStructureLevel,
+                    charEnterTimes,
+                  },
+                });
+  
+                if (props.isLastTrial && props.isLastBlock) {
+                  // last trial in last block
                   SpeakControl.forceSpeak('实验结束');
-                } else {
+                } else if (props.isLastTrial) {
+                  // last trial not in last block
                   SpeakControl.forceSpeak('该block结束，回车进行下一block');
                   let handleNextEnter = e => {
                     if (e.charCode === 13) {
@@ -85,18 +88,34 @@ const Trial = (props) => {
                     }
                   }
                   document.addEventListener('keypress', handleNextEnter);
+                } else {
+                  // not last trial
+                  SpeakControl.forceSpeak('输入结束，回车进行下一个');
+                  let handleNextEnter = e => {
+                    dispatch({ type: 'NEXT_TRIAL' });
+                    document.removeEventListener('keypress', handleNextEnter);
+                  }
+                  document.addEventListener('keypress', handleNextEnter);
                 }
-              } else {
-                SpeakControl.forceSpeak('输入结束，回车进行下一个');
-                let handleNextEnter = e => {
-                  dispatch({ type: 'NEXT_TRIAL' });
-                  document.removeEventListener('keypress', handleNextEnter);
-                }
-                document.addEventListener('keypress', handleNextEnter);
               }
-            } else if (e.charCode === 32) { // ban space key
+            }
+          }}
+          onKeyDown={e => {
+            if (e.keyCode === 8) {
+              // ban backspace key
               e.preventDefault();
-              console.log('用户输入空格');
+            }
+          }}
+          onKeyPress={e => {
+            // ban data inputed by keys
+            e.preventDefault();
+            if (e.charCode === 32) {
+              // backspace to report target string and result string
+              // while entering
+              SpeakControl.forceSpeak(
+                props.trial.targetString + '，' +
+                '已输入' + props.trial.targetString.slice(0, resultString.length)
+              );
             }
           }}
         />
