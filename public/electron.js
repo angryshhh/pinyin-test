@@ -9,9 +9,11 @@ const WM_COPYDATA = 0x004A;
 let mainWindow;
 
 let candidateList = '';
+let wordFrequencyLevel = 0, referenceStructureLevel = 0;
 
 let db;
-const sql = `select word from t_word join (t_character_word join t_character on char_id = t_character.id) on word_id = t_word.id where character=? order by frequency desc limit 1`;
+const randomFrequencySql = `select word from t_word join (t_character_word join t_character on char_id = t_character.id) on word_id = t_word.id where character=? order by random() limit 1`;
+const highFrequencySql = `select word from t_word join (t_character_word join t_character on char_id = t_character.id) on word_id = t_word.id where character=? order by frequency desc limit 1`;
 
 function createWindow () {
   const IS_DEV = process.env.NODE_ENV === 'development';
@@ -50,22 +52,23 @@ function createWindow () {
       let characters = temp.trim().split(' ');
 
       for (let i = 0; i < characters.length; i++) {
-        let word = await ((character, database) => {
+        let word = await ((character, database, wordFrequencyLevel, referenceStructureLevel) => {
           // use async/await to solve the problem of asynchronous sqlite query
           return new Promise((resolve, reject) => {
             database.serialize(() => {
               database.get(
-                sql,
+                wordFrequencyLevel ? highFrequencySql : randomFrequencySql,
                 [character],
                 (err, row) => {
                   if (err) reject(err.message);
-                  else if (row) resolve('、' + row.word);
-                  else resolve('');
+                  else if (row) {
+                    resolve(`、${row.word}${referenceStructureLevel ? '' : `的${character}`}`)
+                  } else resolve('');
                 }
               );
             });
           });
-        })(characters[i], db);
+        })(characters[i], db, wordFrequencyLevel, referenceStructureLevel);
 
         characters[i] += word;
       }
@@ -98,4 +101,10 @@ app.on('activate', () => {
   if (mainWindow === null) {
     createWindow();
   }
+});
+
+ipcMain.on('set-levels', (event, data) => {
+  wordFrequencyLevel = data.wordFrequencyLevel;
+  referenceStructureLevel = data.referenceStructureLevel;
+  console.log(wordFrequencyLevel, referenceStructureLevel)
 });

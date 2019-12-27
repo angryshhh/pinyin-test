@@ -7,6 +7,8 @@ import AnalysisResult from './AnalysisResult';
 import SpeakControl from '../utils/SpeakControl';
 import { TrialsDispatch } from '../utils/Contexts';
 
+const { ipcRenderer } = window.require('electron');
+
 const Trial = (props) => {
   const [isEntering, setIsEntering] = useState(false);
   const [resultString, setResultString] = useState('');
@@ -18,6 +20,10 @@ const Trial = (props) => {
   useEffect(() => {
     if (props.isCurrentTrial) {
       SpeakControl.forceSpeak(props.trial.targetString);
+      ipcRenderer.send('set-levels', {
+        wordFrequencyLevel: props.trial.wordFrequencyLevel,
+        referenceStructureLevel: props.trial.referenceStructureLevel
+      });
       setResultString('');
       setIsEntering(false);
       setCharStartTime(new Date());
@@ -35,7 +41,7 @@ const Trial = (props) => {
       }
       document.addEventListener('keypress', handleSpaceAndEnter);
     }
-  }, [props.isCurrentTrial, props.index, props.trial.targetString]);
+  }, [props.isCurrentTrial, props.index, props.trial]);
 
   return (
     <div>
