@@ -5,7 +5,7 @@ import {
 import React, { useState, useEffect, useContext } from 'react';
 import { useHistory } from 'react-router-dom';
 import SpeakControl from '../utils/SpeakControl';
-import { TrialsDispatch } from './Contexts.js';
+import { TrialsDispatch } from '../utils/Contexts.js';
 
 const { confirm, info } = Modal;
 

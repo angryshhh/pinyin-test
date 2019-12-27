@@ -1,5 +1,6 @@
 import { Descriptions, Divider } from 'antd';
 import React from 'react';
+import { wordFrequencyLevels, referenceStructureLevels } from '../utils/data';
 
 const AnalysisResult = (props) => {
   const { result } = props;
@@ -10,8 +11,8 @@ const AnalysisResult = (props) => {
         bordered
       >
         <Descriptions.Item label="输入时长">{result.trialTime}毫秒</Descriptions.Item>
-        <Descriptions.Item label="提示用词次品">{result.wordFrequencyLevel}</Descriptions.Item>
-        <Descriptions.Item label="提示内容结构">{result.referenceStructureLevel}</Descriptions.Item>
+        <Descriptions.Item label="提示用词次品">{wordFrequencyLevels[result.wordFrequencyLevel]}</Descriptions.Item>
+        <Descriptions.Item label="提示内容结构">{referenceStructureLevels[result.referenceStructureLevel]}</Descriptions.Item>
         <Descriptions.Item label="subject code">{result.subjectCode}</Descriptions.Item>
         <Descriptions.Item label="block num">{result.blockNum}</Descriptions.Item>
         <Descriptions.Item label="trial num">{result.trialNum}</Descriptions.Item>

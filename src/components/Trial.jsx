@@ -5,7 +5,7 @@ import {
 import React, { useState, useEffect, useContext } from 'react';
 import AnalysisResult from './AnalysisResult';
 import SpeakControl from '../utils/SpeakControl';
-import { TrialsDispatch } from './Contexts';
+import { TrialsDispatch } from '../utils/Contexts';
 
 const Trial = (props) => {
   const [isEntering, setIsEntering] = useState(false);

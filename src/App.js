@@ -9,8 +9,8 @@ import { Layout } from 'antd';
 import BlockPage from './components/BlockPage';
 import LoginPage from './components/LoginPage';
 import SpeakControl from './utils/SpeakControl';
-import { TrialsDispatch } from './components/Contexts';
-import { initialState, reducer } from './components/store';
+import { TrialsDispatch } from './utils/Contexts';
+import { initialState, reducer } from './utils/store';
 
 const { Header, Content, Footer } = Layout;
 
