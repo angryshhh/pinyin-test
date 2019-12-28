@@ -39,7 +39,7 @@ const LoginPage = (props) => {
       placeholder="请输入编号"
       type="number"
       value={subjectCode}
-      onChange={e => setSubjectCode(e.target.value)}
+      onChange={e => setSubjectCode(parseInt(e.target.value))}
       onKeyPress={e => {
         if (e.charCode === 13) {
           let confirmContent = `你是${subjectCode}号同学吗`;

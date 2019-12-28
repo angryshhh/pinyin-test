@@ -26,6 +26,12 @@ function App() {
     });
   }, []);
 
+  useEffect(() => {
+    if (state.completed) {
+      ipcRenderer.send('complete', state.results);
+    }
+  }, [state.completed, state.results]);
+
   return (
     <BrowserRouter>
       <Layout style={{ height: '100vh' }}>

@@ -48,6 +48,7 @@
   },
   "dependencies": {
     "ffi-napi": "^2.4.5",
+    "node-xlsx": "^0.15.0",
     "sqlite3": "^4.1.1"
   },
   "devDependencies": {

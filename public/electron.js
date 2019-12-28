@@ -1,8 +1,10 @@
 const { app, BrowserWindow, clipboard, ipcMain } = require('electron');
 const ffi = require('ffi-napi');
 const path = require('path');
+const fs = require('fs');
 const sqlite3 = require('sqlite3').verbose();
 const url = require('url');
+const xlsx = require('node-xlsx').default;
 
 const WM_COPYDATA = 0x004A;
 
@@ -107,4 +109,34 @@ ipcMain.on('set-levels', (event, data) => {
   wordFrequencyLevel = data.wordFrequencyLevel;
   referenceStructureLevel = data.referenceStructureLevel;
   console.log(wordFrequencyLevel, referenceStructureLevel)
+});
+
+ipcMain.on('complete', (event, data) => {
+  const writeData = [
+    [
+      'Subject Code',
+      'Block', 'Trial',
+      'Word Frequency',
+      'Reference Structure',
+      'Trial Time',
+      'Error Rate',
+      'Character Times',
+    ],
+    ...xlsx.parse('db/result.xlsx')[0].data.slice(1),
+    ...data.map(result =>
+      [
+        result.subjectCode,
+        result.blockNum,
+        result.trialNum,
+        result.wordFrequencyLevel,
+        result.referenceStructureLevel,
+        result.trialTime,
+        result.errorRate,
+        ...result.charEnterTimes,
+      ]
+    ),
+  ]
+  var buffer = xlsx.build([{name: "resultSheet", data: writeData}]); // Returns a buffer
+  fs.writeFileSync('db/result.xlsx', buffer);
+  console.log(data);
 });

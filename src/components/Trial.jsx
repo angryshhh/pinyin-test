@@ -90,6 +90,7 @@ const Trial = (props) => {
                 if (props.isLastTrial && props.isLastBlock) {
                   // last trial in last block
                   SpeakControl.forceSpeak('实验结束');
+                  dispatch({ type: 'COMPLETE_ALL' });
                 } else if (props.isLastTrial) {
                   // last trial not in last block
                   SpeakControl.forceSpeak('该block结束，回车进行下一block');

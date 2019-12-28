@@ -1,6 +1,7 @@
 import { targetStrings, balancedLatinSquare } from './data';
 
 const initialState = {
+  completed: false,
   subjectCode: 1,
   blockCount: 5,
   currentBlock: 1,
@@ -50,6 +51,11 @@ const reducer = (state, action) => {
           currentTrial: 1,
         };
       } else return state;
+    case 'COMPLETE_ALL':
+      return {
+        ...state,
+        completed: true,
+      };
     default:
       throw new Error();
   }
