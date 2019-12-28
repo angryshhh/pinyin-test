@@ -16,6 +16,7 @@ const AnalysisResult = (props) => {
         <Descriptions.Item label="subject code">{result.subjectCode}</Descriptions.Item>
         <Descriptions.Item label="block num">{result.blockNum}</Descriptions.Item>
         <Descriptions.Item label="trial num">{result.trialNum}</Descriptions.Item>
+        <Descriptions.Item label="错误率">{result.errorRate}</Descriptions.Item>
         <Descriptions.Item label="各字输入时间">
           {
             result.charEnterTimes.map(time =>

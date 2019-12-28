@@ -70,6 +70,11 @@ const Trial = (props) => {
               if (str.length === props.trial.targetString.length) {
                 // finish trial
                 let trialTime = new Date() - startEnterTime;
+                let errorRate = 0;
+                for (let i = 0; i < str.length; i++) {
+                  if (str[i] !== props.trial.targetString[i]) errorRate++;
+                }
+                errorRate /= str.length;
                 setIsEntering(false);
                 dispatch({
                   type: 'COMPLETE_TRIAL',
@@ -78,6 +83,7 @@ const Trial = (props) => {
                     wordFrequencyLevel: props.trial.wordFrequencyLevel,
                     referenceStructureLevel: props.trial.referenceStructureLevel,
                     charEnterTimes,
+                    errorRate,
                   },
                 });
   
