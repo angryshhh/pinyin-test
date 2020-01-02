@@ -3,6 +3,7 @@ import {
   Input,
 } from 'antd';
 import React, { useState, useEffect, useContext } from 'react';
+import { useHistory } from 'react-router-dom';
 import AnalysisResult from './AnalysisResult';
 import SpeakControl from '../utils/SpeakControl';
 import { TrialsDispatch } from '../utils/Contexts';
@@ -16,6 +17,7 @@ const Trial = (props) => {
   const [charStartTime, setCharStartTime] = useState(new Date());
   const [charEnterTimes, setCharEnterTimes] = useState([]);
   const dispatch = useContext(TrialsDispatch);
+  const history = useHistory();
 
   useEffect(() => {
     if (props.isCurrentTrial) {
@@ -87,16 +89,13 @@ const Trial = (props) => {
                   },
                 });
   
-                if (props.isLastTrial && props.isLastBlock) {
-                  // last trial in last block
-                  SpeakControl.forceSpeak('实验结束');
-                  dispatch({ type: 'COMPLETE_ALL' });
-                } else if (props.isLastTrial) {
+                if (props.isLastTrial) {
                   // last trial not in last block
-                  SpeakControl.forceSpeak('该block结束，回车进行下一block');
+                  SpeakControl.forceSpeak('该block结束，回车退出');
                   let handleNextEnter = e => {
                     if (e.charCode === 13) {
-                      dispatch({ type: 'NEXT_BLOCK' });
+                      dispatch({ type: 'COMPLETE_ALL' });
+                      history.push('/login');
                       document.removeEventListener('keypress', handleNextEnter);
                     }
                   }

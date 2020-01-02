@@ -12,6 +12,7 @@ let mainWindow;
 
 let candidateList = '';
 let wordFrequencyLevel = 0, referenceStructureLevel = 0;
+let xlsxSheets;
 
 let db;
 const randomFrequencySql = `select word from t_word join (t_character_word join t_character on char_id = t_character.id) on word_id = t_word.id where character=? order by random() limit 1`;
@@ -28,10 +29,11 @@ function createWindow () {
     slashes: true,
   });
   mainWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
+    // 16:9
+    width: 1280,
+    height: 720,
     webPreferences: {
-      nodeIntegration: true // so that page can write const { ipcRenderer } = window.require('electron');
+      nodeIntegration: true // so that page can use ipcRenderer of electron
     },
   });
   mainWindow.loadURL(main);
@@ -44,6 +46,8 @@ function createWindow () {
   dll.SetHook(mainWindow.getNativeWindowHandle().readInt32LE());
 
   db = new sqlite3.Database('db/wcp.db');
+
+  xlsxSheets = xlsx.parse('db/data.xlsx');
 
   mainWindow.hookWindowMessage(WM_COPYDATA, async value => {
     let temp = clipboard.readText().trim();
@@ -83,6 +87,20 @@ function createWindow () {
     clipboard.clear();
   });
 
+  mainWindow.webContents.once('did-finish-load', () => {
+    let experimentData = {
+      targetStrings: xlsxSheets[1].data[1],
+      wordFrequencyLevels: xlsxSheets[1].data[4],
+      referenceStructureLevels: xlsxSheets[1].data[7],
+      balancedLatinSquare: xlsxSheets[1].data.slice(10, 14).map(row =>
+        row.map(combination =>
+          ({ wordFrequencyLevel: parseInt(combination[0]), referenceStructureLevel: parseInt(combination[2])})
+        )
+      ),
+    };
+    mainWindow.webContents.send('experiment-data', experimentData);
+  });
+
   mainWindow.on('closed', () => {
     dll.Unhook();
     db.close();
@@ -111,18 +129,30 @@ ipcMain.on('set-levels', (event, data) => {
   console.log(wordFrequencyLevel, referenceStructureLevel)
 });
 
+ipcMain.on('get-block', (event, data) => {
+  let maxBlock = 0;
+  xlsxSheets[0].data.slice(1).forEach(row => {
+    if (row[0] === data && row[1] > maxBlock) {
+      maxBlock = row[1];
+    }
+  });
+  if (maxBlock === xlsxSheets[1].data[16][0]) event.returnValue = -1;
+  else event.returnValue = maxBlock;
+});
+
 ipcMain.on('complete', (event, data) => {
   const writeData = [
     [
       'Subject Code',
-      'Block', 'Trial',
+      'Block',
+      'Trial',
       'Word Frequency',
       'Reference Structure',
       'Trial Time',
       'Error Rate',
       'Character Times',
     ],
-    ...xlsx.parse('db/result.xlsx')[0].data.slice(1),
+    ...xlsxSheets[0].data.slice(1),
     ...data.map(result =>
       [
         result.subjectCode,
@@ -135,8 +165,12 @@ ipcMain.on('complete', (event, data) => {
         ...result.charEnterTimes,
       ]
     ),
-  ]
-  var buffer = xlsx.build([{name: "resultSheet", data: writeData}]); // Returns a buffer
-  fs.writeFileSync('db/result.xlsx', buffer);
-  console.log(data);
+  ];
+  var buffer = xlsx.build([
+    {name: 'result', data: writeData},
+    {name: 'experimentData', data: xlsxSheets[1].data},
+  ]); // Returns a buffer
+  fs.writeFileSync('db/data.xlsx', buffer);
+  xlsxSheets = xlsx.parse('db/data.xlsx');
+  // console.log(data);
 });

@@ -24,18 +24,23 @@ function App() {
       console.log('web page receive:' + data);
       SpeakControl.forceSpeak(data);
     });
+    ipcRenderer.on('experiment-data', (event, data) => {
+      console.log(data);
+      dispatch({ type: 'SET_DATA', data})
+    });
   }, []);
 
   useEffect(() => {
     if (state.completed) {
       ipcRenderer.send('complete', state.results);
+      dispatch({ type: 'RESET' });
     }
   }, [state.completed, state.results]);
 
   return (
     <BrowserRouter>
       <Layout style={{ height: '100vh' }}>
-        <Header style={{ color: 'white', textAlign: 'center' }}>Block { state.currentBlock }</Header>
+        <Header style={{ color: 'white', textAlign: 'center' }}>Block { state.block }</Header>
         <Content style={{ padding: '0 50px' }}>
           <div style={{
             background: 'white',
@@ -48,21 +53,15 @@ function App() {
                 <Route exact path="/">
                   <Redirect to="/login"></Redirect>
                 </Route>
-                <Route path="/login">
+                <Route path="/login" subjectCode={state.subjectCode}>
                   <LoginPage />
                 </Route>
                 <Route path="/block">
                   <BlockPage
-                    currentBlock={state.currentBlock}
-                    isLastBlock={state.blockCount === state.currentBlock}
+                    block={state.block}
                     trials={state.trials}
                     currentTrial={state.currentTrial}
-                    results={
-                      state.results.slice(
-                        (state.currentBlock - 1) * state.trials.length,
-                        (state.currentBlock - 1) * state.trials.length + state.trials.length
-                      )
-                    }
+                    results={state.results}
                   />
                 </Route>
               </Switch>

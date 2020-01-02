@@ -8,10 +8,11 @@ import SpeakControl from '../utils/SpeakControl';
 import { TrialsDispatch } from '../utils/Contexts.js';
 
 const { confirm, info } = Modal;
+const { ipcRenderer } = window.require('electron');
 
 const LoginPage = (props) => {
   const history = useHistory();
-  const [subjectCode, setSubjectCode] = useState();
+  const [subjectCode, setSubjectCode] = useState(props.subjectCode);
   const dispatch = useContext(TrialsDispatch);
   let infoContent = `
     实验步骤：\n
@@ -42,24 +43,28 @@ const LoginPage = (props) => {
       onChange={e => setSubjectCode(parseInt(e.target.value))}
       onKeyPress={e => {
         if (e.charCode === 13) {
-          let confirmContent = `你是${subjectCode}号同学吗`;
+          let finishedBlock = ipcRenderer.sendSync('get-block', subjectCode);
+          let confirmContent = `${subjectCode}号同学已完成${finishedBlock >= 0 ? finishedBlock + '个' : '所有'}block`;
           SpeakControl.forceSpeak(confirmContent);
           confirm({
             title: '信息确认',
             content: confirmContent,
             onOk() {
-              SpeakControl.forceSpeak(infoContent);
-              info({
-                title: '重要提示',
-                content: infoContent,
-                onOk() {
-                  dispatch({
-                    type: 'SUBJECT_LOGIN',
-                    subjectCode,
-                  })
-                  history.push('/block');
-                }
-              });
+              if (finishedBlock >= 0) {
+                SpeakControl.forceSpeak(infoContent);
+                info({
+                  title: '重要提示',
+                  content: infoContent,
+                  onOk() {
+                    dispatch({
+                      type: 'SUBJECT_LOGIN',
+                      subjectCode,
+                      block: finishedBlock + 1,
+                    })
+                    history.push('/block');
+                  }
+                });
+              }
             },
           });
         }

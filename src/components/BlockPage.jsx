@@ -10,10 +10,6 @@ const BlockPage = (props) => {
   const [activeKey, setActiveKey] = useState(0);
 
   useEffect(() => {
-    setActiveKey(0);
-  }, [props.currentBlock]);
-
-  useEffect(() => {
     setActiveKey(props.currentTrial - 1);
   }, [props.currentTrial])
 
@@ -39,7 +35,6 @@ const BlockPage = (props) => {
               isCurrentTrial={index === props.currentTrial - 1}
               result={props.results[index]}
               isLastTrial={index === props.trials.length - 1}
-              isLastBlock={props.isLastBlock}
             />
           </Panel>
         )

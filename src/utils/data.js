@@ -1,3 +1,5 @@
+// no longer used
+
 export const targetStrings = [
   '您吃了吗',
   '天气不错',

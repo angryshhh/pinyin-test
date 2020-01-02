@@ -1,20 +1,25 @@
-import { targetStrings, balancedLatinSquare } from './data';
-
 const initialState = {
+  targetStrings: [],
+  balancedLatinSquare: [],
   completed: false,
   subjectCode: 1,
-  blockCount: 5,
-  currentBlock: 1,
+  block: 1,
   trials: [],
   currentTrial: 1,
   results: [],
 };
 
 const reducer = (state, action) => {
-  let { blockCount, currentBlock, trials, currentTrial, results } = state;
+  let { trials, currentTrial, results, targetStrings, balancedLatinSquare } = state;
   switch (action.type) {
+    case 'SET_DATA':
+      return {
+        ...state,
+        targetStrings: action.data.targetStrings,
+        balancedLatinSquare: action.data.balancedLatinSquare,
+      }
     case 'SUBJECT_LOGIN':
-      let subjectCode = action.subjectCode;
+      let { subjectCode, block } = action;
       balancedLatinSquare[subjectCode % 4].forEach(levelCombination => {
         targetStrings.forEach(targetString => {
           trials.push({ ...levelCombination, targetString });
@@ -25,12 +30,13 @@ const reducer = (state, action) => {
         ...state,
         subjectCode,
         trials,
+        block,
       };
     case 'COMPLETE_TRIAL':
       let { result } = action;
       result.subjectCode = state.subjectCode;
-      result.blockNum = state.currentBlock;
-      result.trialNum = state.currentTrial
+      result.blockNum = state.block;
+      result.trialNum = state.currentTrial;
       results.push(result);
       return {
         ...state,
@@ -43,18 +49,18 @@ const reducer = (state, action) => {
         ...state,
         currentTrial,
       };
-    case 'NEXT_BLOCK':
-      if (currentBlock !== blockCount) {
-        return {
-          ...state,
-          currentBlock: Math.min(currentBlock + 1, blockCount),
-          currentTrial: 1,
-        };
-      } else return state;
     case 'COMPLETE_ALL':
       return {
         ...state,
         completed: true,
+      };
+    case 'RESET':
+      return {
+        ...state,
+        completed: false,
+        trials: [],
+        currentTrial: 1,
+        results: [],
       };
     default:
       throw new Error();
