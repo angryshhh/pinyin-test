@@ -2,7 +2,7 @@ import {
   Card,
   Input,
 } from 'antd';
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
 import AnalysisResult from './AnalysisResult';
 import SpeakControl from '../utils/SpeakControl';
@@ -16,6 +16,7 @@ const Trial = (props) => {
   const [startEnterTime, setStartEnterTime] = useState(new Date());
   const [charStartTime, setCharStartTime] = useState(new Date());
   const [charEnterTimes, setCharEnterTimes] = useState([]);
+  const inputRef = useRef(null);
   const dispatch = useContext(TrialsDispatch);
   const history = useHistory();
 
@@ -37,22 +38,22 @@ const Trial = (props) => {
         } else if (e.charCode === 13) {
           setStartEnterTime(new Date());
           setIsEntering(true);
-          document.querySelector(`#input${props.index}`).focus();
+          inputRef.current.focus();
           document.removeEventListener('keypress', handleSpaceAndEnter);
         }
       }
       document.addEventListener('keypress', handleSpaceAndEnter);
     }
-  }, [props.isCurrentTrial, props.index, props.trial]);
+  }, [props.isCurrentTrial, props.trial]);
 
   return (
     <div>
       <Card title={`Target string: ${props.trial.targetString}`}>
         <Input
-          id={'input' + props.index}
           placeholder="在此输入"
           disabled={!isEntering}
           value={resultString}
+          ref={inputRef}
           onChange={e => {
             let str = e.target.value;
             if (str[str.length - 1] === ' ') {

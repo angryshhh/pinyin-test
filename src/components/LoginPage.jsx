@@ -2,7 +2,7 @@ import {
   Modal,
   Input,
 } from 'antd';
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
 import SpeakControl from '../utils/SpeakControl';
 import { TrialsDispatch } from '../utils/Contexts.js';
@@ -14,6 +14,7 @@ const LoginPage = (props) => {
   const history = useHistory();
   const [subjectCode, setSubjectCode] = useState(props.subjectCode);
   const dispatch = useContext(TrialsDispatch);
+  const inputRef = useRef(null);
   let infoContent = `
     实验步骤：\n
     1、程序朗读目标字符串，可按空格键重复朗读\n
@@ -32,6 +33,8 @@ const LoginPage = (props) => {
 
   useEffect(() => {
     SpeakControl.forceSpeak('请输入编号');
+    inputRef.current.focus();
+    inputRef.current.select();
   }, []);
 
   return (
@@ -39,8 +42,13 @@ const LoginPage = (props) => {
       autoFocus
       placeholder="请输入编号"
       type="number"
+      ref={inputRef}
       value={subjectCode}
-      onChange={e => setSubjectCode(parseInt(e.target.value))}
+      onChange={e => {
+        if (e.target.value) {
+          setSubjectCode(parseInt(e.target.value))
+        }
+      }}
       onKeyPress={e => {
         if (e.charCode === 13) {
           let finishedBlock = ipcRenderer.sendSync('get-block', subjectCode);

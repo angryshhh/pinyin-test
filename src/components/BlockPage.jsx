@@ -31,7 +31,6 @@ const BlockPage = (props) => {
           >
             <Trial
               trial={trial}
-              index={index}
               isCurrentTrial={index === props.currentTrial - 1}
               result={props.results[index]}
               isLastTrial={index === props.trials.length - 1}
