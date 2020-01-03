@@ -53,8 +53,8 @@ function App() {
                 <Route exact path="/">
                   <Redirect to="/login"></Redirect>
                 </Route>
-                <Route path="/login" subjectCode={state.subjectCode}>
-                  <LoginPage />
+                <Route path="/login">
+                  <LoginPage subjectCode={state.subjectCode} />
                 </Route>
                 <Route path="/block">
                   <BlockPage
