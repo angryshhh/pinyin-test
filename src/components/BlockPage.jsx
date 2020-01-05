@@ -1,6 +1,4 @@
-import {
-  Collapse,
-} from 'antd';
+import { Collapse } from 'antd';
 import React, { useState, useEffect } from 'react';
 import Trial from './Trial';
 

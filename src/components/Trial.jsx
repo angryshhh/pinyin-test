@@ -62,9 +62,12 @@ const Trial = (props) => {
               // the enter of the chinese character
               setResultString(str);
               setCharStartTime(e.timeStamp);
-            } else if (/.*[\u4e00-\u9fa5]+.*$/.test(str[str.length - 1])) {
+            } else if (/.*[\u4e00-\u9fa5]+.*$/.test(str[resultString.length - 1])) {
               // only handle chinese character
               // not some symbols returned from input method
+              // now resultString ended with a blank
+              // so must minus 1
+              str = str.slice(0, resultString.length);
               setResultString(str);
               SpeakControl.cancelFormerSpeak();
               charEnterTimes.push(e.timeStamp - charStartTime);

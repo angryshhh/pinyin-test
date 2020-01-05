@@ -8,6 +8,7 @@ import {
 import { Layout } from 'antd';
 import BlockPage from './components/BlockPage';
 import LoginPage from './components/LoginPage';
+import WarmUpPage from './components/WarmUpPage';
 import SpeakControl from './utils/SpeakControl';
 import { TrialsDispatch } from './utils/Contexts';
 import { initialState, reducer } from './utils/store';
@@ -26,7 +27,7 @@ function App() {
     });
     ipcRenderer.on('experiment-data', (event, data) => {
       console.log(data);
-      dispatch({ type: 'SET_DATA', data})
+      dispatch({ type: 'SET_DATA', data });
     });
   }, []);
 
@@ -55,6 +56,11 @@ function App() {
                 </Route>
                 <Route path="/login">
                   <LoginPage subjectCode={state.subjectCode} />
+                </Route>
+                <Route path="/warm-up">
+                  <WarmUpPage
+                    warmUpStrings={state.warmUpStrings}
+                  />
                 </Route>
                 <Route path="/block">
                   <BlockPage

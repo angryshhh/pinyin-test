@@ -97,6 +97,7 @@ function createWindow () {
           ({ wordFrequencyLevel: parseInt(combination[0]), referenceStructureLevel: parseInt(combination[2])})
         )
       ),
+      warmUpStrings: xlsxSheets[1].data[19],
     };
     mainWindow.webContents.send('experiment-data', experimentData);
   });

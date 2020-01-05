@@ -1,6 +1,7 @@
 const initialState = {
   targetStrings: [],
   balancedLatinSquare: [],
+  warmUpStrings: [],
   completed: false,
   subjectCode: 1,
   block: 1,
@@ -17,7 +18,8 @@ const reducer = (state, action) => {
         ...state,
         targetStrings: action.data.targetStrings,
         balancedLatinSquare: action.data.balancedLatinSquare,
-      }
+        warmUpStrings: action.data.warmUpStrings,
+      };
     case 'SUBJECT_LOGIN':
       let { subjectCode, block } = action;
       balancedLatinSquare[subjectCode % 4].forEach(levelCombination => {
