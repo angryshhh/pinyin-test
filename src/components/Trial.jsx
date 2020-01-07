@@ -114,6 +114,8 @@ const Trial = (props) => {
                   document.addEventListener('keypress', handleNextEnter);
                 }
               }
+            } else {
+              setResultString(str);
             }
           }}
           onKeyDown={e => {
