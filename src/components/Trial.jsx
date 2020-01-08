@@ -76,6 +76,7 @@ const Trial = (props) => {
 
               if (str.length === props.trial.targetString.length) {
                 // finish trial
+                SpeakControl.forceSpeak(str);
                 let trialTime = new Date() - startEnterTime;
                 let errorRate = 0;
                 for (let i = 0; i < str.length; i++) {
@@ -96,7 +97,7 @@ const Trial = (props) => {
   
                 if (props.isLastTrial) {
                   // last trial
-                  SpeakControl.forceSpeak('该block结束，回车退出');
+                  SpeakControl.forceSpeak(`输入结果：${str}。该block结束，回车退出`);
                   let handleNextEnter = e => {
                     if (e.charCode === 13) {
                       dispatch({ type: 'COMPLETE_ALL' });
@@ -107,7 +108,7 @@ const Trial = (props) => {
                   document.addEventListener('keypress', handleNextEnter);
                 } else {
                   // not last trial
-                  SpeakControl.forceSpeak('输入结束，回车进行下一个');
+                  SpeakControl.forceSpeak(`输入结果：${str}。输入结束，回车进行下一个`);
                   let handleNextEnter = e => {
                     dispatch({ type: 'NEXT_TRIAL' });
                     document.removeEventListener('keypress', handleNextEnter);
