@@ -69,7 +69,8 @@ const Trial = (props) => {
               // so must minus 1
               str = str.slice(0, resultString.length);
               setResultString(str);
-              SpeakControl.cancelFormerSpeak();
+              let isCorrect = str[str.length - 1] === props.trial.targetString[str.length - 1];
+              SpeakControl.forceSpeak(isCorrect ? '输入正确' : '输入错误');
               charEnterTimes.push(e.timeStamp - charStartTime);
               setCharEnterTimes(charEnterTimes);
 
@@ -94,7 +95,7 @@ const Trial = (props) => {
                 });
   
                 if (props.isLastTrial) {
-                  // last trial not in last block
+                  // last trial
                   SpeakControl.forceSpeak('该block结束，回车退出');
                   let handleNextEnter = e => {
                     if (e.charCode === 13) {
