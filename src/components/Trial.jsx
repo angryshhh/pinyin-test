@@ -6,6 +6,7 @@ import React, { useState, useEffect, useContext, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
 import AnalysisResult from './AnalysisResult';
 import SpeakControl from '../utils/SpeakControl';
+import { minStringDistance } from '../utils/algorithms';
 import { TrialsDispatch } from '../utils/Contexts';
 
 const { ipcRenderer } = window.require('electron');
@@ -78,10 +79,7 @@ const Trial = (props) => {
                 // finish trial
                 SpeakControl.forceSpeak(str);
                 let trialTime = new Date() - startEnterTime;
-                let errorRate = 0;
-                for (let i = 0; i < str.length; i++) {
-                  if (str[i] !== props.trial.targetString[i]) errorRate++;
-                }
+                let errorRate = minStringDistance(props.trial.targetString, str);
                 errorRate /= str.length;
                 setIsEntering(false);
                 dispatch({
