@@ -1,21 +1,16 @@
-const { app, BrowserWindow, clipboard, ipcMain } = require('electron');
+const { app, BrowserWindow, clipboard } = require('electron');
 const ffi = require('ffi-napi');
 const path = require('path');
-const fs = require('fs');
 const sqlite3 = require('sqlite3').verbose();
 const url = require('url');
-const xlsx = require('node-xlsx').default;
 
 const WM_COPYDATA = 0x004A;
 
 let mainWindow;
 
 let candidateList = '';
-let wordFrequencyLevel = 0, referenceStructureLevel = 0;
-let xlsxSheets;
 
 let db;
-const randomFrequencySql = `select word from t_word join (t_character_word join t_character on char_id = t_character.id) on word_id = t_word.id where character=? order by random() limit 1`;
 const highFrequencySql = `select word from t_word join (t_character_word join t_character on char_id = t_character.id) on word_id = t_word.id where character=? order by frequency desc limit 1`;
 
 function createWindow () {
@@ -47,8 +42,6 @@ function createWindow () {
 
   db = new sqlite3.Database('db/wcp.db');
 
-  xlsxSheets = xlsx.parse('db/data.xlsx');
-
   mainWindow.hookWindowMessage(WM_COPYDATA, async value => {
     let temp = clipboard.readText().trim();
 
@@ -58,23 +51,23 @@ function createWindow () {
       let characters = temp.trim().split(' ');
 
       for (let i = 0; i < characters.length; i++) {
-        let word = await ((character, database, wordFrequencyLevel, referenceStructureLevel) => {
+        let word = await ((character, database) => {
           // use async/await to solve the problem of asynchronous sqlite query
           return new Promise((resolve, reject) => {
             database.serialize(() => {
               database.get(
-                wordFrequencyLevel ? highFrequencySql : randomFrequencySql,
+                highFrequencySql,
                 [character],
                 (err, row) => {
                   if (err) reject(err.message);
                   else if (row) {
-                    resolve(`、${row.word}${referenceStructureLevel ? '' : `的${character}`}`)
+                    resolve(`、${row.word}`)
                   } else resolve('');
                 }
               );
             });
           });
-        })(characters[i], db, wordFrequencyLevel, referenceStructureLevel);
+        })(characters[i], db);
 
         characters[i] += word;
       }
@@ -85,21 +78,6 @@ function createWindow () {
       );
     }
     clipboard.clear();
-  });
-
-  mainWindow.webContents.once('did-finish-load', () => {
-    let experimentData = {
-      targetStrings: xlsxSheets[1].data[1],
-      wordFrequencyLevels: xlsxSheets[1].data[4],
-      referenceStructureLevels: xlsxSheets[1].data[7],
-      balancedLatinSquare: xlsxSheets[1].data.slice(10, 14).map(row =>
-        row.map(combination =>
-          ({ wordFrequencyLevel: parseInt(combination[0]), referenceStructureLevel: parseInt(combination[2])})
-        )
-      ),
-      warmUpStrings: xlsxSheets[1].data[19],
-    };
-    mainWindow.webContents.send('experiment-data', experimentData);
   });
 
   mainWindow.on('closed', () => {
@@ -122,56 +100,4 @@ app.on('activate', () => {
   if (mainWindow === null) {
     createWindow();
   }
-});
-
-ipcMain.on('set-levels', (event, data) => {
-  wordFrequencyLevel = data.wordFrequencyLevel;
-  referenceStructureLevel = data.referenceStructureLevel;
-  console.log(wordFrequencyLevel, referenceStructureLevel)
-});
-
-ipcMain.on('get-block', (event, data) => {
-  let maxBlock = 0;
-  xlsxSheets[0].data.slice(1).forEach(row => {
-    if (row[0] === data && row[1] > maxBlock) {
-      maxBlock = row[1];
-    }
-  });
-  if (maxBlock === xlsxSheets[1].data[16][0]) event.returnValue = -1;
-  else event.returnValue = maxBlock;
-});
-
-ipcMain.on('complete', (event, data) => {
-  const writeData = [
-    [
-      'Subject Code',
-      'Block',
-      'Trial',
-      'Word Frequency',
-      'Reference Structure',
-      'Trial Time',
-      'Error Rate',
-      'Character Times',
-    ],
-    ...xlsxSheets[0].data.slice(1),
-    ...data.map(result =>
-      [
-        result.subjectCode,
-        result.blockNum,
-        result.trialNum,
-        result.wordFrequencyLevel,
-        result.referenceStructureLevel,
-        result.trialTime,
-        result.errorRate,
-        ...result.charEnterTimes,
-      ]
-    ),
-  ];
-  var buffer = xlsx.build([
-    {name: 'result', data: writeData},
-    {name: 'experimentData', data: xlsxSheets[1].data},
-  ]); // Returns a buffer
-  fs.writeFileSync('db/data.xlsx', buffer);
-  xlsxSheets = xlsx.parse('db/data.xlsx');
-  // console.log(data);
 });
